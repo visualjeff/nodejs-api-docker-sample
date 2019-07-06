@@ -1,0 +1,29 @@
+{
+  "name": "nodejs-api-docker-sample",
+  "version": "1.0.0",
+  "description": "A test node api for exercising docker and docker-compose",
+  "main": "server.js",
+  "engines": {
+    "node": "10.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/visualjeff/nodejs-api-docker-sample.git"
+  },
+  "scripts": {
+    "test": "lab",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/hapi": "^18.3.1",
+    "hapi-graceful-shutdown-plugin": "^2.0.8",
+    "lokijs-plugin": "^2.0.1"
+  },
+  "devDependencies": {
+    "@hapi/code": "^5.3.1",
+    "@hapi/lab": "^18.1.2"
+  }
+}
