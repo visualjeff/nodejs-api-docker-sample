@@ -10,7 +10,7 @@ const { init } = require('../server');
 const util = require('util');
 const sleep = require('util').promisify(setTimeout);
 
-lab.experiment("Exercise users", async () => {
+lab.experiment("Exercise users --> ", async () => {
     let server;
 
     lab.before(async () => {
@@ -25,7 +25,16 @@ lab.experiment("Exercise users", async () => {
         //await sleep(1100);
     }); 
 
-    lab.test('Get all children', async () => {
+    lab.test('Post to add a record', async () => {
+        const res = await server.inject({
+            method: 'post',
+            url: '/add',
+	    payload: { name: 'Sleipnir', legs: 2 }
+        });
+        expect(res.statusCode).to.equal(201);
+    });
+
+    lab.test('Get all records', async () => {
         const res = await server.inject({
             method: 'get',
             url: '/'
@@ -33,7 +42,7 @@ lab.experiment("Exercise users", async () => {
         expect(res.statusCode).to.equal(200);
     });
     
-    lab.test('Get a child', async () => {
+    lab.test('Get a record', async () => {
         const res = await server.inject({
             method: 'get',
             url: '/Sleipnir'
@@ -41,7 +50,7 @@ lab.experiment("Exercise users", async () => {
         expect(res.statusCode).to.equal(200);
     });
     
-    lab.test('Post a child', async () => {
+    lab.test('Post to add a record again', async () => {
         const res = await server.inject({
             method: 'post',
             url: '/add',
@@ -50,7 +59,7 @@ lab.experiment("Exercise users", async () => {
         expect(res.statusCode).to.equal(201);
     });
     
-     lab.test('Get the child we just added', async () => {
+     lab.test('Get the record we just added', async () => {
         const res = await server.inject({
             method: 'get',
             url: '/jeff'
@@ -58,7 +67,7 @@ lab.experiment("Exercise users", async () => {
         expect(res.statusCode).to.equal(200);
     });
 
-    lab.test('Update the child we just added', async () => {
+    lab.test('Update the record we just added', async () => {
         const res = await server.inject({
             method: 'patch',
             url: '/update',
@@ -67,7 +76,7 @@ lab.experiment("Exercise users", async () => {
         expect(res.statusCode).to.equal(204);
     });
 
-    lab.test('Get the child we just updated', async () => {
+    lab.test('Get the record we just updated', async () => {
         const res = await server.inject({
             method: 'get',
             url: '/jeff'
@@ -76,7 +85,7 @@ lab.experiment("Exercise users", async () => {
 	expect(res.result.legs).to.equal(3);
     });
 
-    lab.test('Delete the child we just updated', async () => {
+    lab.test('Delete the record we just updated', async () => {
         const res = await server.inject({
             method: 'delete',
             url: '/delete',

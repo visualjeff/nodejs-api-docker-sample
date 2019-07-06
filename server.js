@@ -91,13 +91,13 @@ const init = async () => {
         }
     }]);
     
-    /* LokiJS Test code */
+    /* LokiJS initializing code */
     const db = server.app.db;
     const children = db.addCollection('children');
-    children.insert({name:'Sleipnir', legs: 8})
     
    /* 
     server.app.db.getCollection('children');
+    children.insert({name:'Sleipnir', legs: 8})
     let child = children.get(1);
     console.log(child);
     
