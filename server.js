@@ -36,14 +36,19 @@ server.route({
     }
 });
 
-
 server.route({
     method: 'POST',
     path: '/add',
     handler: async (request, h) => {
-        if (request.payload) {
+        if (request.payload && !Array.isArray(request.payload)) {
             const children = request.app.db.getCollection('children');
-            children.insert({ name: request.payload.name, legs: request.payload.legs  })
+            children.insert({ name: request.payload.name, legs: request.payload.legs })
+	    return h.response('success').code(201);
+	} else if (request.payload && Array.isArray(request.payload)) {
+            const children = request.app.db.getCollection('children');
+            request.payload.forEach(child => {
+		children.insert({ name: child.name, legs: child.legs });
+	    });
 	    return h.response('success').code(201);
 	}
     }	
@@ -91,22 +96,10 @@ const init = async () => {
         }
     }]);
     
-    /* LokiJS initializing code */
+    // LokiJS initializing code
     const db = server.app.db;
-    const children = db.addCollection('children');
-    
-   /* 
-    server.app.db.getCollection('children');
-    children.insert({name:'Sleipnir', legs: 8})
-    let child = children.get(1);
-    console.log(child);
-    
-    child.legs = 9;
-    children.update(child);
+    const children = db.addCollection('children', { indices: ['name'] });
 
-    child = children.get(1);
-    console.log(child);
-*/
     await server.initialize();
     return server;
 };
@@ -118,13 +111,12 @@ const start = async () => {
 };
 
 process.on('unhandledRejection', (err) => {
-
     console.log(err);
     process.exit(1);
 });
 
-
 if (process.env.NODE_ENV == 'test') {
+    //for unit testing
     exports.init = init;
 } else {
     start();

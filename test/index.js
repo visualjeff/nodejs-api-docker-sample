@@ -7,9 +7,6 @@ const expect = Code.expect;
 
 const { init } = require('../server');
 
-const util = require('util');
-const sleep = require('util').promisify(setTimeout);
-
 lab.experiment("Exercise users --> ", async () => {
     let server;
 
@@ -21,10 +18,7 @@ lab.experiment("Exercise users --> ", async () => {
         await server.stop();
     });
 
-    lab.afterEach(async () => {
-        //await sleep(1100);
-    }); 
-
+    //create	
     lab.test('Post to add a record', async () => {
         const res = await server.inject({
             method: 'post',
@@ -34,14 +28,28 @@ lab.experiment("Exercise users --> ", async () => {
         expect(res.statusCode).to.equal(201);
     });
 
+    //create a batch of children
+    lab.test('Post to add a collection of children', async () => {
+        const res = await server.inject({
+	    method: 'post',
+	    url: '/add',
+	    payload: [{ name: 'Bonnie', legs: 2}, { name: 'Shea', legs: 2 }, { name: 'Ian', legs: 2 }]
+	});
+	expect(res.statusCode).to.equal(201);
+    });
+
+    //read all	
     lab.test('Get all records', async () => {
         const res = await server.inject({
             method: 'get',
             url: '/'
         });
         expect(res.statusCode).to.equal(200);
+	expect(res.result).to.be.array();
+	expect(res.result.length).to.be.greaterThan(1);    
     });
     
+    //read	
     lab.test('Get a record', async () => {
         const res = await server.inject({
             method: 'get',
@@ -50,6 +58,7 @@ lab.experiment("Exercise users --> ", async () => {
         expect(res.statusCode).to.equal(200);
     });
     
+    //create
     lab.test('Post to add a record again', async () => {
         const res = await server.inject({
             method: 'post',
@@ -59,7 +68,8 @@ lab.experiment("Exercise users --> ", async () => {
         expect(res.statusCode).to.equal(201);
     });
     
-     lab.test('Get the record we just added', async () => {
+    //read
+    lab.test('Get the record we just added', async () => {
         const res = await server.inject({
             method: 'get',
             url: '/jeff'
@@ -67,6 +77,7 @@ lab.experiment("Exercise users --> ", async () => {
         expect(res.statusCode).to.equal(200);
     });
 
+    //update	
     lab.test('Update the record we just added', async () => {
         const res = await server.inject({
             method: 'patch',
@@ -76,6 +87,7 @@ lab.experiment("Exercise users --> ", async () => {
         expect(res.statusCode).to.equal(204);
     });
 
+    //read
     lab.test('Get the record we just updated', async () => {
         const res = await server.inject({
             method: 'get',
@@ -85,13 +97,26 @@ lab.experiment("Exercise users --> ", async () => {
 	expect(res.result.legs).to.equal(3);
     });
 
-    lab.test('Delete the record we just updated', async () => {
+    //delete	
+    lab.test('Delete a record', async () => {
         const res = await server.inject({
             method: 'delete',
             url: '/delete',
-            payload: { name: 'jeff' }
+            payload: { name: 'Sleipnir' }
         });
         expect(res.statusCode).to.equal(201);
+    });
+
+    
+    //read all	
+    lab.test('Get all records', async () => {
+        const res = await server.inject({
+            method: 'get',
+            url: '/'
+        });
+        expect(res.statusCode).to.equal(200);
+	expect(res.result).to.be.array();
+	expect(res.result.length).to.be.equal(4);    
     });
 });
 
