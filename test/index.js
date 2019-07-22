@@ -118,5 +118,18 @@ lab.experiment("Exercise users --> ", async () => {
 	expect(res.result).to.be.array();
 	expect(res.result.length).to.be.equal(4);    
     });
+
+
+    //query
+    lab.test('Get the records with more than 1 leg', async () => {
+        const res = await server.inject({
+            method: 'get',
+            url: '/query/1'
+        });
+        expect(res.statusCode).to.equal(200);
+	expect(res.result).to.be.array();
+	expect(res.result.length).to.equal(4);
+    });
+
 });
 

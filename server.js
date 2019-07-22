@@ -79,6 +79,27 @@ server.route({
     }
 });
 
+//Query by legs
+server.route({
+    method: 'GET',
+    path: '/query/{legs}',
+    config: {
+        auth: false, //Public access allowed
+        description: 'Get / children with particular number of legs',	
+        handler: async (request, h) => {
+            if (request.params.legs) {
+	        const children = request.app.db.getCollection('children');
+                children.find( { legs: { '$gt' : 2 } } );
+                const legs = children.addDynamicView('legs');	
+                legs.applyFind( { legs: { '$gt' : request.params.legs } });
+                legs.applySimpleSort('legs');
+                return h.response(legs.data());
+	    }
+       }
+    }
+});
+
+
 const init = async () => {
     await server.register([{
         plugin: require('lokijs-plugin'),
