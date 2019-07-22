@@ -89,7 +89,7 @@ server.route({
         handler: async (request, h) => {
             if (request.params.legs) {
 	        const children = request.app.db.getCollection('children');
-                children.find( { legs: { '$gt' : 2 } } );
+                //children.find( { legs: { '$gt' : 2 } } );
                 const legs = children.addDynamicView('legs');	
                 legs.applyFind( { legs: { '$gt' : request.params.legs } });
                 legs.applySimpleSort('legs');
