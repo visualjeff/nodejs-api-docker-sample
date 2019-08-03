@@ -1,24 +1,24 @@
 'use strict';
 
 const Code = require('@hapi/code'); // assertion library
-const Lab = require('@hapi/lab');
+const Lab = require('@hapi/lab'); //Test framework (based on Mocha)
 const lab = exports.lab = Lab.script();
 const expect = Code.expect;
 
-const { init } = require('../server');
+const { init } = require('../server'); //Import the init method from the server.
 
-lab.experiment("Exercise users --> ", async () => {
+lab.experiment("Exercise endpoints --> ", async () => {
     let server;
 
     lab.before(async () => {
-        server = await init();
+        server = await init(); //Start server
     });
 
     lab.after(async () => {
-        await server.stop();
+        await server.stop(); //Stop server
     });
 
-    //create	
+    //create db record via a POST	
     lab.test('Post to add a record', async () => {
         const res = await server.inject({
             method: 'post',
@@ -28,17 +28,48 @@ lab.experiment("Exercise users --> ", async () => {
         expect(res.statusCode).to.equal(201);
     });
 
-    //create a batch of children
-    lab.test('Post to add a collection of children', async () => {
+    //read all of the children from the database
+    lab.test('Get all records', async () => {
         const res = await server.inject({
-	    method: 'post',
-	    url: '/add',
-	    payload: [{ name: 'Bonnie', legs: 2}, { name: 'Shea', legs: 2 }, { name: 'Ian', legs: 2 }]
-	});
-	expect(res.statusCode).to.equal(201);
+            method: 'get',
+            url: '/'
+        });
+        expect(res.statusCode).to.equal(200);
+	expect(res.result).to.be.array();
+	expect(res.result.length).to.be.equal(1);    
+    });
+    
+    //create db record via a POST	
+    lab.test('Post to add a record', async () => {
+        const res = await server.inject({
+            method: 'post',
+            url: '/add',
+	    payload: { name: 'Bonnie', legs: 2 }
+        });
+        expect(res.statusCode).to.equal(201);
+    });
+    
+    //create db record via a POST	
+    lab.test('Post to add a record', async () => {
+        const res = await server.inject({
+            method: 'post',
+            url: '/add',
+	    payload: { name: 'Shea', legs: 2 }
+        });
+        expect(res.statusCode).to.equal(201);
     });
 
-    //read all	
+    //create db record via a POST	
+    lab.test('Post to add a record', async () => {
+        const res = await server.inject({
+            method: 'post',
+            url: '/add',
+	    payload: { name: 'Ian', legs: 2 }
+        });
+        expect(res.statusCode).to.equal(201);
+    });
+	
+    //read all of the children from the database
     lab.test('Get all records', async () => {
         const res = await server.inject({
             method: 'get',
@@ -49,7 +80,7 @@ lab.experiment("Exercise users --> ", async () => {
 	expect(res.result.length).to.be.greaterThan(1);    
     });
     
-    //read	
+    //read a child out of the database
     lab.test('Get a record', async () => {
         const res = await server.inject({
             method: 'get',
@@ -58,7 +89,7 @@ lab.experiment("Exercise users --> ", async () => {
         expect(res.statusCode).to.equal(200);
     });
     
-    //create
+    //create a child in the database using POST
     lab.test('Post to add a record again', async () => {
         const res = await server.inject({
             method: 'post',
@@ -68,7 +99,7 @@ lab.experiment("Exercise users --> ", async () => {
         expect(res.statusCode).to.equal(201);
     });
     
-    //read
+    //read the record we just created.
     lab.test('Get the record we just added', async () => {
         const res = await server.inject({
             method: 'get',
@@ -77,7 +108,7 @@ lab.experiment("Exercise users --> ", async () => {
         expect(res.statusCode).to.equal(200);
     });
 
-    //update	
+    //update the record we just created
     lab.test('Update the record we just added', async () => {
         const res = await server.inject({
             method: 'patch',
@@ -87,7 +118,7 @@ lab.experiment("Exercise users --> ", async () => {
         expect(res.statusCode).to.equal(204);
     });
 
-    //read
+    //read the record we just updated
     lab.test('Get the record we just updated', async () => {
         const res = await server.inject({
             method: 'get',
@@ -97,7 +128,7 @@ lab.experiment("Exercise users --> ", async () => {
 	expect(res.result.legs).to.equal(3);
     });
 
-    //delete	
+    //delete a record from the database using DELETE	
     lab.test('Delete a record', async () => {
         const res = await server.inject({
             method: 'delete',
@@ -108,7 +139,7 @@ lab.experiment("Exercise users --> ", async () => {
     });
 
     
-    //read all	
+    //read all of the database records
     lab.test('Get all records', async () => {
         const res = await server.inject({
             method: 'get',
@@ -118,5 +149,6 @@ lab.experiment("Exercise users --> ", async () => {
 	expect(res.result).to.be.array();
 	expect(res.result.length).to.be.equal(4);    
     });
+    
 });
 
