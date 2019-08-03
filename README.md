@@ -24,8 +24,7 @@ npm test
 
 ### To validate the app is running visit the urls listed below with your browser:
 ```
-http://localhost:1337/
-http://localhost:1337/<<YOUR_NAME>>
+http://localhost:1337/documentation
 ```
 
 ### Docker commands below if you have docker or docker-compose installed:
