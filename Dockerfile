@@ -10,7 +10,7 @@ RUN apk add curl
 
 COPY package*.json ./
 
-RUN npm install --production
+RUN npm install --production && npm cache clean --force --silent
 
 COPY . .
 
@@ -20,4 +20,4 @@ HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:1337/ || exi
 
 USER node
 
-CMD [ "node", "start" ]
+CMD [ "node", "server.js" ]
