@@ -5,10 +5,12 @@ const Inert = require('@hapi/inert');
 const Vision = require('@hapi/vision');
 const Joi = require('@hapi/joi');
 const HapiSwagger = require('hapi-swagger');
+// $lab:coverage:off$
 const server = Hapi.server({
     port: process.env.port || 1337, //default port 1337 is for running on Azure.
     host: '0.0.0.0'
 });
+// $lab:coverage:on$
 
 server.route({
     method: 'GET',
@@ -33,15 +35,13 @@ server.route({
 	tags: ['api'],
 	validate: {
             params: {
-                name: Joi.string()
+                name: Joi.string().required()
             },
 	},
         handler: async (request, h) => {
-            if (request.params.name) {
-	        const children = request.app.db.getCollection('children');
-		const child = children.findOne( {'name': request.params.name } );
-		return h.response(child);
-	    }
+	    const children = request.app.db.getCollection('children');
+            const child = children.findOne( {'name': request.params.name } );
+	    return h.response(child);
        }
     }
 });
@@ -60,16 +60,14 @@ server.route({
         },    
 	validate: {
             payload: Joi.object({
-                name: Joi.string(),
-                legs: Joi.number()
+                name: Joi.string().required(),
+                legs: Joi.number().required()
             })
 	},
         handler: async (request, h) => {
-            if (request.payload) {
-                const children = request.app.db.getCollection('children');
-                children.insert({ name: request.payload.name, legs: request.payload.legs });
-	        return h.response('success').code(201);
-	    }
+            const children = request.app.db.getCollection('children');
+            children.insert({ name: request.payload.name, legs: request.payload.legs });
+	    return h.response('success').code(201);
         }
     }
 });
@@ -88,18 +86,16 @@ server.route({
         },    
 	validate: {
             payload: Joi.object({
-                name: Joi.string(),
-                legs: Joi.number()
+                name: Joi.string().required(),
+                legs: Joi.number().required()
             })
 	},
         handler: async (request, h) => {
-            if (request.payload) {
-	        const children = request.app.db.getCollection('children');
-	        const child = children.findOne({ 'name': request.payload.name });
-	        child.legs = request.payload.legs;
-	        children.update(child);
-	        return h.response(null).code(204);
-	    }
+	    const children = request.app.db.getCollection('children');
+	    const child = children.findOne({ 'name': request.payload.name });
+	    child.legs = request.payload.legs;
+	    children.update(child);
+	    return h.response(null).code(204);
         }
     }
 });
@@ -118,7 +114,7 @@ server.route({
         },    
 	validate: {
             payload: Joi.object({
-                name: Joi.string()
+                name: Joi.string().required()
             })
 	},
         handler: async (request, h) => {
@@ -139,22 +135,20 @@ server.route({
         tags: ['api'],
         validate: {
             params: {
-                legs: Joi.number()
+                legs: Joi.number().required()
             },
         },
 	handler: async (request, h) => {
-            if (request.params.legs) {
-	        const children = request.app.db.getCollection('children');
-                const legs = children.addDynamicView('legs');	
-                legs.applyFind( { legs: { '$eq' : request.params.legs } });
-                legs.applySimpleSort('legs');
-                return h.response(legs.data());
-	    }
+            const children = request.app.db.getCollection('children');
+            const legs = children.addDynamicView('legs');	
+            legs.applyFind( { legs: { '$eq' : request.params.legs } });
+            legs.applySimpleSort('legs');
+            return h.response(legs.data());
        }
     }
 });
 
-
+// $lab:coverage:off$
 const init = async () => {
     //Details about Swagger options can be found here: https://github.com/glennjones/hapi-swagger/blob/HEAD/usageguide.md	
     const swaggerOptions = {
@@ -207,24 +201,30 @@ const init = async () => {
     await server.initialize();
     return server;
 };
+// $lab:coverage:on$
 
+// $lab:coverage:off$
 const start = async () => {
     await init();
     await server.start();
     console.log(`Server running at: ${server.info.uri}`);
 };
+// $lab:coverage:off$
 
 //To handle promise rejections
+// $lab:coverage:off$
 process.on('unhandledRejection', (err) => {
     console.log(err);
     process.exit(1);
 });
+// $lab:coverage:on$
 
 //Added for unit testing
+// $lab:coverage:off$
 if (process.env.NODE_ENV == 'test') {
     //for unit testing
     exports.init = init;
 } else {
     start();
 }
-
+// $lab:coverage:on$

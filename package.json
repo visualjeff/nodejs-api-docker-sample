@@ -12,6 +12,7 @@
   },
   "scripts": {
     "test": "lab",
+    "test-coverage": "lab -l -m 10000 -c -r html -o ./test/artifacts/coverage.html",
     "start": "node server.js"
   },
   "keywords": [],

@@ -39,11 +39,11 @@ lab.experiment("Exercise endpoints --> ", async () => {
     });
 
     lab.afterEach(async () => {
-        //await sleep(100);
+        //await sleep(50);
     });	
 
     lab.after(async () => {
-        await sleep(5000);
+        await sleep(5000); //Let database autosave take place
         await server.stop(); //Stop server
     });
 
@@ -98,6 +98,18 @@ lab.experiment("Exercise endpoints --> ", async () => {
         });
         expect(res.statusCode).to.equal(201);
     });
+    
+    //create db record via a POST, but with a bad payload.	
+    lab.test('Post to add a record', async () => {
+        const res = await server.inject({
+            method: 'post',
+            url: '/add',
+	    payload: { name: randomNamesArray[3], legs: 'A' }
+        });
+        expect(res.statusCode).to.equal(400);
+        expect(res.result.error).to.equal('Bad Request');
+        expect(res.result.message).to.equal('Invalid request payload input');
+    });
 
     //read all of the children from the database
     lab.test('Get all records', async () => {
@@ -118,7 +130,7 @@ lab.experiment("Exercise endpoints --> ", async () => {
         });
         expect(res.statusCode).to.equal(200);
     });
-    
+
     //create a child in the database using POST
     lab.test('Post to add a record again', async () => {
         const res = await server.inject({
@@ -129,6 +141,18 @@ lab.experiment("Exercise endpoints --> ", async () => {
         expect(res.statusCode).to.equal(201);
     });
     
+    //create a child in the database using POST, but with a incomplete payload
+    lab.test('Post to add a record again', async () => {
+        const res = await server.inject({
+            method: 'post',
+            url: '/add',
+	    payload: { name: randomNamesArray[4] }
+        });
+        expect(res.statusCode).to.equal(400);
+        expect(res.result.error).to.equal('Bad Request');
+        expect(res.result.message).to.equal('Invalid request payload input');
+    });
+
     //read the record we just created.
     lab.test('Get the record we just added', async () => {
         const res = await server.inject({
@@ -146,6 +170,18 @@ lab.experiment("Exercise endpoints --> ", async () => {
 	    payload: { name: randomNamesArray[4], legs: 99 }
         });
         expect(res.statusCode).to.equal(204);
+    });
+
+    //update the record we just created, but with an incomplete playload
+    lab.test('Update the record we just added', async () => {
+        const res = await server.inject({
+            method: 'patch',
+            url: '/update',
+	    payload: { name: randomNamesArray[4] }
+        });
+        expect(res.statusCode).to.equal(400);
+        expect(res.result.error).to.equal('Bad Request');
+        expect(res.result.message).to.equal('Invalid request payload input');
     });
 
     //read the record we just updated
@@ -216,6 +252,18 @@ lab.experiment("Exercise endpoints --> ", async () => {
             payload: { name: randomNamesArray[4] }
         });
         expect(res.statusCode).to.equal(201);
+    });
+
+    //delete a record from the database using DELETE, but with a bad payload	
+    lab.test('Delete a record', async () => {
+        const res = await server.inject({
+            method: 'delete',
+            url: '/delete',
+            payload: { namme: randomNamesArray[4] }
+        });
+        expect(res.statusCode).to.equal(400);
+        expect(res.result.error).to.equal('Bad Request');
+        expect(res.result.message).to.equal('Invalid request payload input');
     });
 	
     //read all of the database records
