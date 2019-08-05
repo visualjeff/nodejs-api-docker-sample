@@ -5,16 +5,45 @@ const Lab = require('@hapi/lab'); //Test framework (based on Mocha)
 const lab = exports.lab = Lab.script();
 const expect = Code.expect;
 
+const faker = require('faker');
+
+const sleep = require('util').promisify(setTimeout);
+
 const { init } = require('../server'); //Import the init method from the server.
 
 lab.experiment("Exercise endpoints --> ", async () => {
     let server;
+    let initialNumberOfRecords;
+    let randomNamesArray;
 
     lab.before(async () => {
-        server = await init(); //Start server
+        //Start server
+	server = await init();
+
+        await sleep(100);
+
+	//Get the initial number of records
+        const entries = server.app.db.getCollection('children');
+	initialNumberOfRecords = entries.data.length;
+
+        //Generate an array of random names to test with
+	randomNamesArray = new Array(5).fill({}).reduce((accumulator, value, index) => {
+	    accumulator[index] = faker.name.firstName();     
+            return accumulator;
+	}, []);
+
     });
 
+    lab.beforeEach(async () => {
+        await sleep(50);
+    });
+
+    lab.afterEach(async () => {
+        //await sleep(100);
+    });	
+
     lab.after(async () => {
+        await sleep(5000);
         await server.stop(); //Stop server
     });
 
@@ -23,7 +52,49 @@ lab.experiment("Exercise endpoints --> ", async () => {
         const res = await server.inject({
             method: 'post',
             url: '/add',
-	    payload: { name: 'Sleipnir', legs: 2 }
+	    payload: { name: randomNamesArray[0], legs: 2 }
+        });
+        expect(res.statusCode).to.equal(201);
+    });
+
+
+    //read all of the children from the database
+    lab.test('Get all records', async () => {
+        const res = await server.inject({
+            method: 'get',
+            url: '/'
+        });
+        expect(res.statusCode).to.equal(200);
+	expect(res.result).to.be.array();
+	expect(res.result.length).to.be.equal(initialNumberOfRecords + 1);    
+    });
+   
+    //create db record via a POST	
+    lab.test('Post to add a record', async () => {
+        const res = await server.inject({
+            method: 'post',
+            url: '/add',
+	    payload: { name: randomNamesArray[1], legs: 2 }
+        });
+        expect(res.statusCode).to.equal(201);
+    });
+   
+    //create db record via a POST	
+    lab.test('Post to add a record', async () => {
+        const res = await server.inject({
+            method: 'post',
+            url: '/add',
+	    payload: { name: randomNamesArray[2], legs: 2 }
+        });
+        expect(res.statusCode).to.equal(201);
+    });
+
+    //create db record via a POST	
+    lab.test('Post to add a record', async () => {
+        const res = await server.inject({
+            method: 'post',
+            url: '/add',
+	    payload: { name: randomNamesArray[3], legs: 2 }
         });
         expect(res.statusCode).to.equal(201);
     });
@@ -36,55 +107,14 @@ lab.experiment("Exercise endpoints --> ", async () => {
         });
         expect(res.statusCode).to.equal(200);
 	expect(res.result).to.be.array();
-	expect(res.result.length).to.be.equal(1);    
-    });
-    
-    //create db record via a POST	
-    lab.test('Post to add a record', async () => {
-        const res = await server.inject({
-            method: 'post',
-            url: '/add',
-	    payload: { name: 'Bonnie', legs: 2 }
-        });
-        expect(res.statusCode).to.equal(201);
-    });
-    
-    //create db record via a POST	
-    lab.test('Post to add a record', async () => {
-        const res = await server.inject({
-            method: 'post',
-            url: '/add',
-	    payload: { name: 'Shea', legs: 2 }
-        });
-        expect(res.statusCode).to.equal(201);
-    });
-
-    //create db record via a POST	
-    lab.test('Post to add a record', async () => {
-        const res = await server.inject({
-            method: 'post',
-            url: '/add',
-	    payload: { name: 'Ian', legs: 2 }
-        });
-        expect(res.statusCode).to.equal(201);
-    });
-	
-    //read all of the children from the database
-    lab.test('Get all records', async () => {
-        const res = await server.inject({
-            method: 'get',
-            url: '/'
-        });
-        expect(res.statusCode).to.equal(200);
-	expect(res.result).to.be.array();
-	expect(res.result.length).to.be.greaterThan(1);    
+	expect(res.result.length).to.be.equal(initialNumberOfRecords + 4);    
     });
     
     //read a child out of the database
     lab.test('Get a record', async () => {
         const res = await server.inject({
             method: 'get',
-            url: '/Sleipnir'
+            url: `/${randomNamesArray[0]}`
         });
         expect(res.statusCode).to.equal(200);
     });
@@ -94,7 +124,7 @@ lab.experiment("Exercise endpoints --> ", async () => {
         const res = await server.inject({
             method: 'post',
             url: '/add',
-	    payload: { name: 'jeff', legs: 2 }
+	    payload: { name: randomNamesArray[4], legs: 2 }
         });
         expect(res.statusCode).to.equal(201);
     });
@@ -103,7 +133,7 @@ lab.experiment("Exercise endpoints --> ", async () => {
     lab.test('Get the record we just added', async () => {
         const res = await server.inject({
             method: 'get',
-            url: '/jeff'
+            url: `/${randomNamesArray[4]}`
         });
         expect(res.statusCode).to.equal(200);
     });
@@ -113,7 +143,7 @@ lab.experiment("Exercise endpoints --> ", async () => {
         const res = await server.inject({
             method: 'patch',
             url: '/update',
-	    payload: { name: 'jeff', legs: 3 }
+	    payload: { name: randomNamesArray[4], legs: 99 }
         });
         expect(res.statusCode).to.equal(204);
     });
@@ -122,10 +152,30 @@ lab.experiment("Exercise endpoints --> ", async () => {
     lab.test('Get the record we just updated', async () => {
         const res = await server.inject({
             method: 'get',
-            url: '/jeff'
+            url: `/${randomNamesArray[4]}`
         });
         expect(res.statusCode).to.equal(200);
-	expect(res.result.legs).to.equal(3);
+	expect(res.result.legs).to.equal(99);
+    });
+
+    lab.test('Get the records with 99 legs', async () => {
+        const res = await server.inject({
+            method: 'get',
+            url: '/query/99'
+        });
+        expect(res.statusCode).to.equal(200);
+	expect(res.result).to.be.array();
+	expect(res.result.length).to.equal(1);
+    });	
+
+    //delete a record from the database using DELETE	
+    lab.test('Delete a record', async () => {
+        const res = await server.inject({
+            method: 'delete',
+            url: '/delete',
+            payload: { name: randomNamesArray[0] }
+        });
+        expect(res.statusCode).to.equal(201);
     });
 
     //delete a record from the database using DELETE	
@@ -133,12 +183,41 @@ lab.experiment("Exercise endpoints --> ", async () => {
         const res = await server.inject({
             method: 'delete',
             url: '/delete',
-            payload: { name: 'Sleipnir' }
+            payload: { name: randomNamesArray[1] }
+        });
+        expect(res.statusCode).to.equal(201);
+    });
+    
+    //delete a record from the database using DELETE	
+    lab.test('Delete a record', async () => {
+        const res = await server.inject({
+            method: 'delete',
+            url: '/delete',
+            payload: { name: randomNamesArray[2] }
         });
         expect(res.statusCode).to.equal(201);
     });
 
-    
+    //delete a record from the database using DELETE	
+    lab.test('Delete a record', async () => {
+        const res = await server.inject({
+            method: 'delete',
+            url: '/delete',
+            payload: { name: randomNamesArray[3] }
+        });
+        expect(res.statusCode).to.equal(201);
+    });
+
+    //delete a record from the database using DELETE	
+    lab.test('Delete a record', async () => {
+        const res = await server.inject({
+            method: 'delete',
+            url: '/delete',
+            payload: { name: randomNamesArray[4] }
+        });
+        expect(res.statusCode).to.equal(201);
+    });
+	
     //read all of the database records
     lab.test('Get all records', async () => {
         const res = await server.inject({
@@ -147,8 +226,8 @@ lab.experiment("Exercise endpoints --> ", async () => {
         });
         expect(res.statusCode).to.equal(200);
 	expect(res.result).to.be.array();
-	expect(res.result.length).to.be.equal(4);    
+	expect(res.result.length).to.be.equal(initialNumberOfRecords);    
     });
-    
+
 });
 

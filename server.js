@@ -130,7 +130,33 @@ server.route({
     }
 });
 
+server.route({
+    method: 'GET',
+    path: '/query/{legs}',
+    config: {
+        auth: false, //Public access allowed
+        description: 'Get / children with particular number of legs',	
+        tags: ['api'],
+        validate: {
+            params: {
+                legs: Joi.number()
+            },
+        },
+	handler: async (request, h) => {
+            if (request.params.legs) {
+	        const children = request.app.db.getCollection('children');
+                const legs = children.addDynamicView('legs');	
+                legs.applyFind( { legs: { '$eq' : request.params.legs } });
+                legs.applySimpleSort('legs');
+                return h.response(legs.data());
+	    }
+       }
+    }
+});
+
+
 const init = async () => {
+    //Details about Swagger options can be found here: https://github.com/glennjones/hapi-swagger/blob/HEAD/usageguide.md	
     const swaggerOptions = {
         schemes: ['http', 'https'],
         host: `localhost:${process.env.port || 1337}`,
@@ -148,6 +174,13 @@ const init = async () => {
         sortEndpoints: "ordered"
     };
 
+    const loadHandler = () => {
+        let entries = db.getCollection('children');	    
+        if (entries === null) {
+            entries = db.addCollection('children', { indices: ['name'] }); //Datatable in database is called children
+        }
+    };
+
     await server.register([ Inert, Vision,
         {
             plugin: HapiSwagger,
@@ -156,7 +189,9 @@ const init = async () => {
 	{
         plugin: require('lokijs-plugin'),
         options: {
-            env: 'NODEJS'
+            env: 'NODEJS',
+	    autoload: true,
+	    autoloadCallback: loadHandler
         }
     }, {
         plugin: require('hapi-graceful-shutdown-plugin'),
@@ -168,12 +203,6 @@ const init = async () => {
     
     // LokiJS initializing code
     const db = server.app.db;
-    (() => {
-        let entries = db.getCollection('children');
-        if (entries === null) {
-            entries = db.addCollection('children', { indices: ['name'] }); //Datatable in database is called children
-        }
-    })(); //IIFE initializes the db.
 
     await server.initialize();
     return server;
