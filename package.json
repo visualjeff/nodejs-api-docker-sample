@@ -11,8 +11,7 @@
     "url": "git://github.com/visualjeff/nodejs-api-docker-sample.git"
   },
   "scripts": {
-    "test": "lab",
-    "test-coverage": "lab -l -m 10000 -c -r html -o ./test/artifacts/coverage.html",
+    "test": "jest",
     "start": "node server.js"
   },
   "keywords": [],
@@ -31,6 +30,7 @@
     "@hapi/code": "^5.3.1",
     "@hapi/lab": "^18.1.2",
     "faker": "^4.1.0",
+    "jest": "^25.1.0",
     "lodash": ">=4.17.13"
   }
 }
