@@ -26,24 +26,24 @@ describe("Exercise endpoints --> ", () => {
                return accumulator;
 	    }, []);
                done();
-            }, 200);
+            }, 100);
         });
     });
 
     beforeEach(function(done) {
         setTimeout(function() {
           done();
-        }, 50);
+        }, 10);
     });
 
     afterEach(function(done) {
         setTimeout(function() {
           done();
-        }, 50);
+        }, 10);
     });	
 
     afterAll(function(done) {
-        setTimeout(function() {}, 5000); //Let database autosave take place
+        setTimeout(function() {}, 2000); //Let database autosave take place
         server.stop(); //Stop server
     });
 
@@ -61,7 +61,7 @@ describe("Exercise endpoints --> ", () => {
 
     //read all of the children from the database
     test('Get all records', function(done) {
-        const res = server.inject({
+        server.inject({
             method: 'get',
             url: '/'
         }).then(function(res) {
@@ -74,23 +74,23 @@ describe("Exercise endpoints --> ", () => {
   
     //create db record via a POST	
     test('Post to add a record', function(done) {
-        const res = server.inject({
+        server.inject({
             method: 'post',
             url: '/add',
 	    payload: { name: randomNamesArray[1], legs: 2 }
-        }).then(function() {
-            expect(res.statuscode).toBe(201);
+        }).then(function(res) {
+            expect(res.statusCode).toBe(201);
             done()
         });
     });
 
     //create db record via a POST	
     test('Post to add a record', function(done) {
-        const res = server.inject({
+        server.inject({
             method: 'post',
             url: '/add',
 	    payload: { name: randomNamesArray[2], legs: 2 }
-        }).then(function() {
+        }).then(function(res) {
             expect(res.statusCode).toBe(201);
             done();
         });
@@ -98,193 +98,224 @@ describe("Exercise endpoints --> ", () => {
 
     //create db record via a POST	
     test('Post to add a record', function(done) {
-        const res = server.inject({
+        server.inject({
             method: 'post',
             url: '/add',
 	    payload: { name: randomNamesArray[3], legs: 2 }
-        }).then(function() {
-            expect(res.statuscode).toBe(201);
+        }).then(function(res) {
+            expect(res.statusCode).toBe(201);
             done();
         });
     });
-/*    
+ 
     //create db record via a POST, but with a bad payload.	
-    test('Post to add a record', async () => {
-        const res = await server.inject({
+    test('Post to add a record', function(done) {
+        server.inject({
             method: 'post',
             url: '/add',
 	    payload: { name: randomNamesArray[3], legs: 'A' }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(400);
+            expect(res.result.error).toBe('Bad Request');
+            expect(res.result.message).toBe('Invalid request payload input');
+            done();
         });
-        expect(res.statusCode).to.equal(400);
-        expect(res.result.error).to.equal('Bad Request');
-        expect(res.result.message).to.equal('Invalid request payload input');
-    });
-
-    //read all of the children from the database
-    test('Get all records', async () => {
-        const res = await server.inject({
-            method: 'get',
-            url: '/'
-        });
-        expect(res.statusCode).to.equal(200);
-	expect(res.result).to.be.array();
-	expect(res.result.length).to.be.equal(initialNumberOfRecords + 4);    
     });
     
+    //read all of the children from the database
+    test('Get all records', function(done) {
+        server.inject({
+            method: 'get',
+            url: '/'
+        }).then(function(res) {
+            expect(res.statusCode).toBe(200);
+	    expect(res.result.length).toBe(initialNumberOfRecords + 4);
+            done(); 
+        });
+    });
+ 
     //read a child out of the database
-    test('Get a record', async () => {
-        const res = await server.inject({
+    test('Get a record', function(done) {
+        server.inject({
             method: 'get',
             url: `/${randomNamesArray[0]}`
+        }).then(function(res) {
+            expect(res.statusCode).toBe(200);
+            done();
         });
-        expect(res.statusCode).to.equal(200);
     });
 
     //create a child in the database using POST
-    test('Post to add a record again', async () => {
-        const res = await server.inject({
+    test('Post to add a record again', function(done) {
+        server.inject({
             method: 'post',
             url: '/add',
 	    payload: { name: randomNamesArray[4], legs: 2 }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(201);
+            done();
         });
-        expect(res.statusCode).to.equal(201);
     });
     
     //create a child in the database using POST, but with a incomplete payload
-    test('Post to add a record again', async () => {
-        const res = await server.inject({
+    test('Post to add a record again', function(done) {
+        server.inject({
             method: 'post',
             url: '/add',
 	    payload: { name: randomNamesArray[4] }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(400);
+            expect(res.result.error).toBe('Bad Request');
+            expect(res.result.message).toBe('Invalid request payload input');
+            done();
         });
-        expect(res.statusCode).to.equal(400);
-        expect(res.result.error).to.equal('Bad Request');
-        expect(res.result.message).to.equal('Invalid request payload input');
     });
-
+    
     //read the record we just created.
-    test('Get the record we just added', async () => {
-        const res = await server.inject({
+    test('Get the record we just added', function(done) {
+        server.inject({
             method: 'get',
             url: `/${randomNamesArray[4]}`
+        }).then(function(res) {
+            expect(res.statusCode).toBe(200);
+            done();
         });
-        expect(res.statusCode).to.equal(200);
     });
 
     //update the record we just created
-    test('Update the record we just added', async () => {
-        const res = await server.inject({
+    test('Update the record we just added', function(done) {
+        server.inject({
             method: 'patch',
             url: '/update',
 	    payload: { name: randomNamesArray[4], legs: 99 }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(204);
+            done();
         });
-        expect(res.statusCode).to.equal(204);
     });
 
     //update the record we just created, but with an incomplete playload
-    test('Update the record we just added', async () => {
-        const res = await server.inject({
+    test('Update the record we just added', function(done) {
+        server.inject({
             method: 'patch',
             url: '/update',
 	    payload: { name: randomNamesArray[4] }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(400);
+            expect(res.result.error).toBe('Bad Request');
+            expect(res.result.message).toBe('Invalid request payload input');
+            done();
         });
-        expect(res.statusCode).to.equal(400);
-        expect(res.result.error).to.equal('Bad Request');
-        expect(res.result.message).to.equal('Invalid request payload input');
     });
 
     //read the record we just updated
-    test('Get the record we just updated', async () => {
-        const res = await server.inject({
+    test('Get the record we just updated', function(done) {
+        server.inject({
             method: 'get',
             url: `/${randomNamesArray[4]}`
+        }).then(function(res) {
+            expect(res.statusCode).toBe(200);
+	    expect(res.result.legs).toBe(99);
+            done();
         });
-        expect(res.statusCode).to.equal(200);
-	expect(res.result.legs).to.equal(99);
     });
 
-    test('Get the records with 99 legs', async () => {
-        const res = await server.inject({
+    test('Get the records with 99 legs', function(done) {
+        server.inject({
             method: 'get',
             url: '/query/99'
+        }).then(function(res) {
+            expect(res.statusCode).toBe(200);
+	    expect(res.result.length).toBe(1);
+            done();
         });
-        expect(res.statusCode).to.equal(200);
-	expect(res.result).to.be.array();
-	expect(res.result.length).to.equal(1);
     });	
 
     //delete a record from the database using DELETE	
-    test('Delete a record', async () => {
-        const res = await server.inject({
+    test('Delete a record', function(done) {
+        server.inject({
             method: 'delete',
             url: '/delete',
             payload: { name: randomNamesArray[0] }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(201);
+            done();
         });
-        expect(res.statusCode).to.equal(201);
     });
 
     //delete a record from the database using DELETE	
-    test('Delete a record', async () => {
-        const res = await server.inject({
+    test('Delete a record', function(done) {
+        server.inject({
             method: 'delete',
             url: '/delete',
             payload: { name: randomNamesArray[1] }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(201);
+            done();
         });
-        expect(res.statusCode).to.equal(201);
     });
     
     //delete a record from the database using DELETE	
-    test('Delete a record', async () => {
-        const res = await server.inject({
+    test('Delete a record', function(done) {
+        server.inject({
             method: 'delete',
             url: '/delete',
             payload: { name: randomNamesArray[2] }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(201);
+            done();
         });
-        expect(res.statusCode).to.equal(201);
     });
 
     //delete a record from the database using DELETE	
-    test('Delete a record', async () => {
-        const res = await server.inject({
+    test('Delete a record', function(done) {
+        server.inject({
             method: 'delete',
             url: '/delete',
             payload: { name: randomNamesArray[3] }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(201);
+            done();
         });
-        expect(res.statusCode).to.equal(201);
     });
 
     //delete a record from the database using DELETE	
-    test('Delete a record', async () => {
-        const res = await server.inject({
+    test('Delete a record', function(done) {
+        server.inject({
             method: 'delete',
             url: '/delete',
             payload: { name: randomNamesArray[4] }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(201);
+            done();
         });
-        expect(res.statusCode).to.equal(201);
     });
 
     //delete a record from the database using DELETE, but with a bad payload	
-    test('Delete a record', async () => {
-        const res = await server.inject({
+    test('Delete a record', function(done) {
+        server.inject({
             method: 'delete',
             url: '/delete',
             payload: { namme: randomNamesArray[4] }
+        }).then(function(res) {
+            expect(res.statusCode).toBe(400);
+            expect(res.result.error).toBe('Bad Request');
+            expect(res.result.message).toBe('Invalid request payload input');
+            done();
         });
-        expect(res.statusCode).to.equal(400);
-        expect(res.result.error).to.equal('Bad Request');
-        expect(res.result.message).to.equal('Invalid request payload input');
     });
 	
     //read all of the database records
-    test('Get all records', async () => {
-        const res = await server.inject({
+    test('Get all records', function(done) {
+        server.inject({
             method: 'get',
             url: '/'
+        }).then(function(res) {
+            expect(res.statusCode).toBe(200);
+	    expect(res.result.length).toBe(initialNumberOfRecords);
+            done(); 
         });
-        expect(res.statusCode).to.equal(200);
-	expect(res.result).to.be.array();
-	expect(res.result.length).to.be.equal(initialNumberOfRecords);    
     });
-*/
+
 });
 
