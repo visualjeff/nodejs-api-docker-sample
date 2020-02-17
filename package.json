@@ -18,13 +18,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hapi/hapi": "^18.3.1",
+    "@hapi/hapi": "^18.4.1",
     "@hapi/inert": "^5.2.1",
     "@hapi/joi": "^15.1.0",
     "@hapi/vision": "^5.5.2",
     "hapi-graceful-shutdown-plugin": "^2.0.8",
     "hapi-swagger": "^10.0.2",
-    "lokijs-plugin": "^2.0.1"
+    "lokijs-plugin": "^2.0.2"
   },
   "devDependencies": {
     "faker": "^4.1.0",
